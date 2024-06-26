@@ -109,6 +109,7 @@ resource "aws_instance" "ec2forstrapi" {
   subnet_id                   = aws_subnet.publicsubnet.id
   key_name                    = "strapipem"
   associate_public_ip_address = true
+  user_data = file("${path.module}/userscript.sh")
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
   ebs_block_device {
     device_name = "/dev/sdh"
@@ -130,8 +131,8 @@ resource "null_resource" "example" {
     provisioner "remote-exec" {
       connection {
       type        = "ssh"
-      user        = "ubuntu"
-      private_key = file("~/.ssh/id_rsa") 
+      user        = var.user
+      password    = var.password
       host        = aws_instance.ec2forstrapi.public_ip
     }
     inline = [
