@@ -1,3 +1,14 @@
+data "template_file" "script" {
+  template = file("${path.module}/userscript.tpl")
+
+  vars = {
+    user     = var.user
+    password = var.password
+  }
+  depends_on = [
+    aws_route_table_association.association
+  ]
+}
 resource "aws_ecr_repository" "my_ecr_repo" {
   name                 = "strapi-repo" 
   image_tag_mutability = "MUTABLE"
@@ -6,7 +17,7 @@ resource "aws_ecr_repository" "my_ecr_repo" {
     scan_on_push = true
   }
   depends_on = [
-    aws_route_table_association.association
+    data.template_file.script
   ]
 }
 resource "aws_iam_role" "ec2_role" {
@@ -109,7 +120,7 @@ resource "aws_instance" "ec2forstrapi" {
   subnet_id                   = aws_subnet.publicsubnet.id
   key_name                    = "strapipem"
   associate_public_ip_address = true
-  user_data = file("${path.module}/userscript.sh")
+  user_data = file("${path.module}/userscript.tpl")
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
   ebs_block_device {
     device_name = "/dev/sdh"
