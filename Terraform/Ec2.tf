@@ -71,9 +71,8 @@ resource "aws_security_group" "sgforstrapi" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-
-    from_port   = 0
-    to_port     = 65535
+    from_port   = 1337
+    to_port     = 1337
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -147,7 +146,7 @@ resource "null_resource" "example" {
       "sudo usermod -aG docker ubuntu",
       "docker image build -t ${aws_ecr_repository.my_ecr_repo.repository_url}:${var.docker_tag} .",
       "docker image push ${aws_ecr_repository.my_ecr_repo.repository_url}:${var.docker_tag}",
-      "docker container run -d -P ${aws_ecr_repository.my_ecr_repo.repository_url}:${var.docker_tag}"
+      "docker container run -d -p 1337:1337 ${aws_ecr_repository.my_ecr_repo.repository_url}:${var.docker_tag}"
     ]
 }
  depends_on = [
