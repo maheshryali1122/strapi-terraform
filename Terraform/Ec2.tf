@@ -102,7 +102,7 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_instance" "ec2forstrapi" {
-  ami                         = data.aws_ami.id
+  ami                         = data.aws_ami.ubuntu.id
   availability_zone           = "us-west-2a"
   instance_type               = "t2.small"
   vpc_security_group_ids      = [aws_security_group.sgforstrapi.id]
