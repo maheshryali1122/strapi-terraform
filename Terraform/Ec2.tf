@@ -42,6 +42,7 @@ resource "aws_iam_policy" "ecr_policy" {
   depends_on = [ aws_iam_role.ec2_role ]
 }
 resource "aws_iam_policy_attachment" "ecr_attachment" {
+  name = "my-ecr-policy-attachment"
   policy_arn = aws_iam_policy.ecr_policy.arn
   roles      = [aws_iam_role.ec2_role.name]
   depends_on = [ aws_iam_policy.ecr_policy ]
