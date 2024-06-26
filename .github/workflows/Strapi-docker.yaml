@@ -31,5 +31,5 @@ jobs:
         env:
           TF_VAR_user: ${{ secrets.USER }}
           TF_VAR_password: ${{ secrets.PASSWORD }}
-        run: terraform apply -var user="{{secrets.USER}}" -var password="{{secrets.PASSWORD}}" -var-file "dev.tfvars" -auto-approve
+        run: terraform apply -var user="${{secrets.USER}}" -var password="${{secrets.PASSWORD}}" -var-file "dev.tfvars" -auto-approve
         working-directory: ./Terraform

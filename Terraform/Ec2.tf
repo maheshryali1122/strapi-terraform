@@ -109,10 +109,12 @@ resource "aws_instance" "ec2forstrapi" {
   subnet_id                   = aws_subnet.publicsubnet.id
   key_name                    = "strapipem"
   associate_public_ip_address = true
-  user_data = templatefile("${path.module}/userscript.tpl", {
-    user     = var.user
-    password = var.password
-  })
+  user_data =  <<-EOF
+                          #!/bin/bash
+                          useradd -m -s /bin/bash ${var.user}
+                          echo "${var.user}:${var.password}" | chpasswd
+                          echo "${var.user} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${var.user}
+                          EOF
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
   ebs_block_device {
     device_name = "/dev/sdh"
