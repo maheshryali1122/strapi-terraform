@@ -109,7 +109,7 @@ resource "aws_instance" "ec2forstrapi" {
   subnet_id                   = aws_subnet.publicsubnet.id
   key_name                    = "strapipem"
   associate_public_ip_address = true
-  user_data = templatefile("${path.module}/user_setup.tpl", {
+  user_data = templatefile("${path.module}/userscript.tpl", {
     user     = var.user
     password = var.password
   })
