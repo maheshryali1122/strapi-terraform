@@ -32,5 +32,6 @@ jobs:
           terraform init
 
       - name: Apply Terraform changes
+        working-directory: ./Terraform
         run: |
           terraform apply -var-file "dev.tfvars" -auto-approve 
