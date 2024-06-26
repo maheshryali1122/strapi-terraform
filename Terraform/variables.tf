@@ -14,5 +14,8 @@ variable "password" {
   type = string
   sensitive = true
 }
+variable "instancetype" {
+  type = string
+}
 
 

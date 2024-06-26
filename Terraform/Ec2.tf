@@ -104,7 +104,7 @@ data "aws_ami" "ubuntu" {
 resource "aws_instance" "ec2forstrapi" {
   ami                         = data.aws_ami.ubuntu.id
   availability_zone           = "us-west-2a"
-  instance_type               = "t2.small"
+  instance_type               = var.instancetype
   vpc_security_group_ids      = [aws_security_group.sgforstrapi.id]
   subnet_id                   = aws_subnet.publicsubnet.id
   key_name                    = "strapipem"
@@ -136,8 +136,8 @@ resource "null_resource" "example" {
     provisioner "remote-exec" {
       connection {
       type        = "ssh"
-      user        = var.user
-      password    = var.password
+      user        = "${var.user}"
+      password    = "${var.password}"
       host        = aws_instance.ec2forstrapi.public_ip
     }
     inline = [
