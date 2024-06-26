@@ -6,7 +6,7 @@ resource "aws_ecr_repository" "my_ecr_repo" {
     scan_on_push = true
   }
   depends_on = [
-    data.template_file.script
+    aws_route_table_association.association
   ]
 }
 resource "aws_iam_role" "ec2_role" {
