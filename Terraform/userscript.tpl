@@ -10,6 +10,6 @@ else
     # Create the user "newuser" because they do not exist
     sudo adduser ${var.user} --gecos "First" --disabled-password
     echo "${var.user}:${var.password}" | sudo chpasswd
-    echo '${var.user} ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/newuser
+    echo '${var.user} ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/${var.user}
     echo "User ${var.user} created and configured."
 fi
