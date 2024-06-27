@@ -108,12 +108,6 @@ resource "aws_instance" "ec2forstrapi" {
   subnet_id                   = aws_subnet.publicsubnet.id
   key_name                    = "strapipem"
   associate_public_ip_address = true
-  user_data =  <<-EOF
-                          #!/bin/bash
-                          useradd -m -s /bin/bash ${var.user}
-                          echo "${var.user}:${var.password}" | chpasswd
-                          echo "${var.user} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${var.user}
-                          EOF
   iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
   ebs_block_device {
     device_name = "/dev/sdh"
@@ -136,16 +130,17 @@ resource "null_resource" "example" {
       connection {
       type        = "ssh"
       user        = "${var.user}"
-      password    = "${var.password}"
+      private_key    = "${var.privatekey}"
       host        = aws_instance.ec2forstrapi.public_ip
     }
     inline = [
       "sudo apt update",
       "export DEBIAN_FRONTEND=noninteractive",
-      "sudo apt install docker.io -y ",
-      "sudo usermod -aG docker ubuntu",
+      "if ! command -v docker &> /dev/null; then sudo apt install docker.io -y && sudo usermod -aG docker ubuntu; fi",
       "docker image build -t ${aws_ecr_repository.my_ecr_repo.repository_url}:${var.docker_tag} .",
       "docker image push ${aws_ecr_repository.my_ecr_repo.repository_url}:${var.docker_tag}",
+      "docker stop $(docker ps -q) || true",
+      "docker rm $(docker ps -aq) || true",
       "docker container run -d -p 1337:1337 ${aws_ecr_repository.my_ecr_repo.repository_url}:${var.docker_tag}"
     ]
 }

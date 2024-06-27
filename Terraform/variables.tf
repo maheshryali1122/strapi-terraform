@@ -10,9 +10,9 @@ variable "user" {
   type = string
   sensitive = true
 }
-variable "password" {
-  type = string
-  sensitive = true
+variable "privatekey" {
+  type        = string
+  sensitive   = true
 }
 variable "instancetype" {
   type = string
