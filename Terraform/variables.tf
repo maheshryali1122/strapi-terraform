@@ -8,7 +8,6 @@ variable "docker_tag" {
 }
 variable "user" {
   type = string
-  sensitive = true
 }
 variable "privatekey" {
   type        = string
