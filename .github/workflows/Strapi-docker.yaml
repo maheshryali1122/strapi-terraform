@@ -28,5 +28,5 @@ jobs:
         run: terraform init
         working-directory: ./Terraform
       - name: Apply the infrastructure
-        run: terraform apply -var user="${{ secrets.USER }}" -var privatekey="${{ secrets.PRIVATEKEY }}" -var ="${{ secrets.DOCKER_USERNAME }}" -var ="${{ secrets.DOCKER_PASSWORD }}" -var-file "dev.tfvars" -auto-approve
+        run: terraform apply -var user="${{ secrets.USER }}" -var privatekey="${{ secrets.PRIVATEKEY }}" -var docker_username="${{ secrets.DOCKER_USERNAME }}" -var docker_password="${{ secrets.DOCKER_PASSWORD }}" -var-file "dev.tfvars" -auto-approve
         working-directory: ./Terraform
