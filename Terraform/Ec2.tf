@@ -53,13 +53,15 @@ resource "aws_instance" "ec2forstrapi" {
   associate_public_ip_address = true
   user_data = <<-EOF
               #!/bin/bash
-              sudo apt update
-              if ! command -v docker &> /dev/null; then 
-                sudo apt install docker.io -y 
-                sudo usermod -aG docker ubuntu 
-                sudo chmod 660 /var/run/docker.sock
-              fi
-              echo ${var.docker_password} | docker login -u ${var.docker_username} --password-stdin
+              {
+                sudo apt update
+                if ! command -v docker &> /dev/null; then 
+                  sudo apt install docker.io -y 
+                  sudo usermod -aG docker ubuntu 
+                  sudo chmod 660 /var/run/docker.sock
+                fi
+                echo ${var.docker_password} | docker login -u ${var.docker_username} --password-stdin
+              } >> /var/log/user-data.log 2>&1
               EOF
   ebs_block_device {
     device_name = "/dev/sdh"
