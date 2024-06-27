@@ -80,7 +80,7 @@ resource "null_resource" "example" {
       "export DEBIAN_FRONTEND=noninteractive",
       "if ! command -v docker &> /dev/null; then sudo apt install docker.io -y && sudo usermod -aG docker ubuntu && sudo chmod 660 /var/run/docker.sock; fi",
       "git clone https://github.com/maheshryali1122/strapi-terraform.git",
-      "docker login -u ${var.docker_username} -p ${var.docker_password}",
+      "echo ${var.docker_password} | docker login -u ${var.docker_username} --password-stdin",
       "docker image build -t maheshryali/strapi-api:${var.docker_tag} .",
       "docker image push maheshryali/strapi-api:${var.docker_tag}",
       "docker stop $(docker ps -q) || true",
