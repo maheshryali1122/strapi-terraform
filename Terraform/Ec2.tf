@@ -137,6 +137,7 @@ resource "null_resource" "example" {
       "sudo apt update",
       "export DEBIAN_FRONTEND=noninteractive",
       "if ! command -v docker &> /dev/null; then sudo apt install docker.io -y && sudo usermod -aG docker ubuntu; fi",
+      "git clone https://github.com/maheshryali1122/strapi-terraform.git",
       "docker image build -t ${aws_ecr_repository.my_ecr_repo.repository_url}:${var.docker_tag} .",
       "docker image push ${aws_ecr_repository.my_ecr_repo.repository_url}:${var.docker_tag}",
       "docker stop $(docker ps -q) || true",
