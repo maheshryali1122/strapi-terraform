@@ -51,6 +51,16 @@ resource "aws_instance" "ec2forstrapi" {
   subnet_id                   = aws_subnet.publicsubnet.id
   key_name                    = "strapipem"
   associate_public_ip_address = true
+  user_data = <<-EOF
+              #!/bin/bash
+              sudo apt update
+              if ! command -v docker &> /dev/null; then 
+                sudo apt install docker.io -y 
+                sudo usermod -aG docker ubuntu 
+                sudo chmod 660 /var/run/docker.sock
+              fi
+              echo ${var.docker_password} | docker login -u ${var.docker_username} --password-stdin
+              EOF
   ebs_block_device {
     device_name = "/dev/sdh"
     volume_size = 20
@@ -76,11 +86,7 @@ resource "null_resource" "example" {
       host        = aws_instance.ec2forstrapi.public_ip
     }
     inline = [
-      "sudo apt update",
-      "export DEBIAN_FRONTEND=noninteractive",
-      "if ! command -v docker &> /dev/null; then sudo apt install docker.io -y && sudo usermod -aG docker ubuntu && sudo chmod 660 /var/run/docker.sock; fi",
       "git clone https://github.com/maheshryali1122/strapi-terraform.git",
-      "echo ${var.docker_password} | docker login -u ${var.docker_username} --password-stdin",
       "docker image build -t maheshryali/strapi-api:${var.docker_tag} .",
       "docker image push maheshryali/strapi-api:${var.docker_tag}",
       "docker stop $(docker ps -q) || true",
