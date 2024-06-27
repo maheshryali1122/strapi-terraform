@@ -51,7 +51,6 @@ resource "aws_instance" "ec2forstrapi" {
   subnet_id                   = aws_subnet.publicsubnet.id
   key_name                    = "strapipem"
   associate_public_ip_address = true
-  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
   ebs_block_device {
     device_name = "/dev/sdh"
     volume_size = 20
