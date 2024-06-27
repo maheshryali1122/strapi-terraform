@@ -19,7 +19,6 @@ variable "instancetype" {
 }
 variable "docker_username" {
   type = string
-  sensitive = true
 }
 variable "docker_password" {
   type = string
