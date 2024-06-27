@@ -1,60 +1,3 @@
-resource "aws_ecr_repository" "my_ecr_repo" {
-  name                 = "strapi-repo" 
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-  depends_on = [
-    aws_route_table_association.association
-  ]
-}
-resource "aws_iam_role" "ec2_role" {
-  name = "ec2-instance-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Action = "sts:AssumeRole",
-      Effect = "Allow",
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-    }]
-  })
-  depends_on = [ aws_ecr_repository.my_ecr_repo ]
-}
-resource "aws_iam_policy" "ecr_policy" {
-  name        = "ec2-instance-pulls-from-ecr"
-  description = "EC2 instance can pull from ECR"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect   = "Allow",
-      Action   = [
-        "ecr:GetAuthorizationToken",
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:GetDownloadUrlForLayer",
-        "ecr:BatchGetImage"
-      ],
-      Resource = "*"
-    }]
-  })
-  depends_on = [ aws_iam_role.ec2_role ]
-}
-resource "aws_iam_policy_attachment" "ecr_attachment" {
-  name = "my-ecr-policy-attachment"
-  policy_arn = aws_iam_policy.ecr_policy.arn
-  roles      = [aws_iam_role.ec2_role.name]
-  depends_on = [ aws_iam_policy.ecr_policy ]
-}
-resource "aws_iam_instance_profile" "ec2_instance_profile" {
-  name = "ec2-instance-profile"
-  role = aws_iam_role.ec2_role.name
-  depends_on = [ aws_iam_policy_attachment.ecr_attachment ]
-}
-
-
-
 resource "aws_security_group" "sgforstrapi" {
   vpc_id      = aws_vpc.vpcstrapi.id
   description = "This is for strapy application"
@@ -80,7 +23,7 @@ resource "aws_security_group" "sgforstrapi" {
   tags = {
     Name = "Sg-strapi"
   }
-  depends_on = [ aws_iam_instance_profile.ec2_instance_profile ]
+  depends_on = [ aws_route_table_association.association ]
 
 }
 data "aws_ami" "ubuntu" {
@@ -138,11 +81,12 @@ resource "null_resource" "example" {
       "export DEBIAN_FRONTEND=noninteractive",
       "if ! command -v docker &> /dev/null; then sudo apt install docker.io -y && sudo usermod -aG docker ubuntu && sudo chmod 660 /var/run/docker.sock; fi",
       "git clone https://github.com/maheshryali1122/strapi-terraform.git",
-      "docker image build -t ${aws_ecr_repository.my_ecr_repo.repository_url}:${var.docker_tag} .",
-      "docker image push ${aws_ecr_repository.my_ecr_repo.repository_url}:${var.docker_tag}",
+      "docker login -u ${docker_username} -p ${docker_password}",
+      "docker image build -t maheshryali/strapi-api:${var.docker_tag} .",
+      "docker image push maheshryali/strapi-api:${var.docker_tag}",
       "docker stop $(docker ps -q) || true",
       "docker rm $(docker ps -aq) || true",
-      "docker container run -d -p 1337:1337 ${aws_ecr_repository.my_ecr_repo.repository_url}:${var.docker_tag}"
+      "docker container run -d -p 1337:1337 maheshryali/strapi-api:${var.docker_tag}"
     ]
 }
  depends_on = [

@@ -17,5 +17,13 @@ variable "privatekey" {
 variable "instancetype" {
   type = string
 }
+variable "docker_username" {
+  type = string
+  sensitive = true
+}
+variable "docker_password" {
+  type = string
+  sensitive = true
+}
 
 
