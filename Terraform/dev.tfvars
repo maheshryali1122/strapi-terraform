@@ -1,3 +1,4 @@
 region = "us-west-2"
-instancetype = "t2.small"
+instance_type = "t2.small"
+key_name = "strapipem"
 number = "1.0"
