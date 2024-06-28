@@ -14,8 +14,9 @@ resource "aws_security_group" "sgforstrapi" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    from_port   = 1337
-    to_port     = 1337
+
+    from_port   = 0
+    to_port     = 65535
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -23,46 +24,17 @@ resource "aws_security_group" "sgforstrapi" {
   tags = {
     Name = "Sg-strapi"
   }
-  depends_on = [ aws_route_table_association.association ]
 
-}
-data "aws_ami" "ubuntu" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"] 
-  depends_on = [ aws_security_group.sgforstrapi ]
 }
 
 resource "aws_instance" "ec2forstrapi" {
-  ami                         = data.aws_ami.ubuntu.id
-  availability_zone           = "us-west-2a"
-  instance_type               = var.instancetype
+  ami                         = "ami-03c983f9003cb9cd1"
+  availability_zone = "us-west-2a"
+  instance_type               = "t2.small"
   vpc_security_group_ids      = [aws_security_group.sgforstrapi.id]
   subnet_id                   = aws_subnet.publicsubnet.id
   key_name                    = "strapipem"
   associate_public_ip_address = true
-  user_data = <<-EOF
-              #!/bin/bash
-              {
-                sudo apt update
-                if ! command -v docker &> /dev/null; then 
-                  sudo apt install docker.io -y 
-                  sudo usermod -aG docker ubuntu 
-                  sudo chmod 660 /var/run/docker.sock
-                fi
-                echo ${var.docker_password} | docker login -u ${var.docker_username} --password-stdin
-              } >> /var/log/user-data.log 2>&1
-              EOF
   ebs_block_device {
     device_name = "/dev/sdh"
     volume_size = 20
@@ -72,32 +44,30 @@ resource "aws_instance" "ec2forstrapi" {
   tags = {
     Name = "ec2forstrapi"
   }
-  depends_on = [ data.aws_ami.ubuntu ]
 }
 
 resource "null_resource" "example" {
-    triggers = {
-    docker_tag = var.docker_tag
+   triggers = {
+    running_number  =  var.number
   }
 
     provisioner "remote-exec" {
       connection {
       type        = "ssh"
-      user        = "${var.user}"
-      private_key    = "${var.privatekey}"
+      user        = "ubuntu"
+      private_key = file("~/.ssh/id_rsa")
       host        = aws_instance.ec2forstrapi.public_ip
     }
     inline = [
-      "git clone https://github.com/maheshryali1122/strapi-terraform.git",
-      "docker image build -t maheshryali/strapi-api:${var.docker_tag} .",
-      "docker image push maheshryali/strapi-api:${var.docker_tag}",
-      "docker stop $(docker ps -q) || true",
-      "docker rm $(docker ps -aq) || true",
-      "docker container run -d -p 1337:1337 maheshryali/strapi-api:${var.docker_tag}"
+      "sudo apt update",
+      "export DEBIAN_FRONTEND=noninteractive",
+      "sudo apt install docker.io -y ",
+      "sudo usermod -aG docker ubuntu",
+      "docker image pull maheshryali/strapi:9.0"
+      "docker container run -d -P maheshryali/strapi:9.0"
     ]
 }
  depends_on = [
     aws_instance.ec2forstrapi
   ]
-}
-
+  }
