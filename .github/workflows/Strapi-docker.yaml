@@ -6,32 +6,32 @@ on:
       - main
 
 jobs:
-  terraform:
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-20.04
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout the code
+        uses: actions/checkout@v4
+        
+      - name: Setting up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.MAHESHR_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.MAHESH_AWS_SECRET_KEY_ID }}
+          aws-region: us-west-2 
 
-      - name: Configure AWS credentials
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: 'us-west-2'  
+      - name: Setting up SSH key
         run: |
-          aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-          aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-          aws configure set region $AWS_DEFAULT_REGION    
+          mkdir -p ~/.ssh
+          echo "${{ secrets.MAHESHR_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
 
-      - name:  Setting up terraform
-        uses: hashicorp/terraform-github-actions/init@v0.4.0
-      - name: Initialization
+      - name: Setting up Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Init
         run: terraform init
         working-directory: ./Terraform
       - name: Apply the infrastructure
-        env:
-          USER: ${{ secrets.USER }}
-          PRIVATEKEY: ${{ secrets.PRIVATEKEY }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-        run: terraform apply -var user="${{ secrets.USER }}" -var privatekey="${{ secrets.PRIVATEKEY }}" -var docker_username="${{ secrets.DOCKER_USERNAME }}" -var docker_password="${{ secrets.DOCKER_PASSWORD }}" -var-file "dev.tfvars" -auto-approve
+        run: terraform apply  -var privatekey="${{ secrets.PRIVATEKEY }}"  -var-file "dev.tfvars" -auto-approve
         working-directory: ./Terraform
