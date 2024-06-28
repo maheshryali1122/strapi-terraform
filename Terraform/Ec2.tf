@@ -15,8 +15,8 @@ resource "aws_security_group" "sgforstrapi" {
   }
   ingress {
 
-    from_port   = 0
-    to_port     = 65535
+    from_port   = 1337
+    to_port     = 1337
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -30,10 +30,10 @@ resource "aws_security_group" "sgforstrapi" {
 resource "aws_instance" "ec2forstrapi" {
   ami                         = "ami-03c983f9003cb9cd1"
   availability_zone = "us-west-2a"
-  instance_type               = "t2.small"
+  instance_type               = var.instance_type
   vpc_security_group_ids      = [aws_security_group.sgforstrapi.id]
   subnet_id                   = aws_subnet.publicsubnet.id
-  key_name                    = "strapipem"
+  key_name                    = var.keyname
   associate_public_ip_address = true
   ebs_block_device {
     device_name = "/dev/sdh"
