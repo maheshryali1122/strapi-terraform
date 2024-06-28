@@ -2,9 +2,6 @@ variable "region" {
   type = string
   default = "us-west-2"
 }
-variable "user" {
-  type = string
-}
 variable "privatekey" {
   type        = string
   sensitive   = true
