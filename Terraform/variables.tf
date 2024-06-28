@@ -23,5 +23,9 @@ variable "docker_password" {
   type = string
   sensitive = true
 }
+variable "number" {
+  type = string
+  default = "1.0"
+}
 
 
