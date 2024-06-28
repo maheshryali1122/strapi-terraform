@@ -16,14 +16,14 @@ jobs:
       - name: Setting up AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.MAHESHR_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.MAHESH_AWS_SECRET_KEY_ID }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2 
 
       - name: Setting up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.MAHESHR_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.PRIVATEKEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
       - name: Setting up Terraform
@@ -33,5 +33,5 @@ jobs:
         run: terraform init
         working-directory: ./Terraform
       - name: Apply the infrastructure
-        run: terraform apply  -var privatekey="${{ secrets.PRIVATEKEY }}"  -var-file "dev.tfvars" -auto-approve
+        run: terraform apply  -var-file "dev.tfvars" -auto-approve
         working-directory: ./Terraform
