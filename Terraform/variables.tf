@@ -9,8 +9,6 @@ variable "number" {
   type = string
   default = "1.0"
 }
-variable "key_name" {
-  type =string
-}
+
 
 
