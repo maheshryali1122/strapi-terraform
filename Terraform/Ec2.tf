@@ -76,7 +76,7 @@ resource "null_resource" "example" {
       "sudo usermod -aG docker ubuntu",
       "sudo chmod 777 /var/run/docker.sock",
       "docker image pull maheshryali/strapi:1.0",
-      "docker container run -d -P 1337:1337 maheshryali/strapi:1.0"
+      "docker container run -d -p 1337:1337 maheshryali/strapi:1.0"
     ]
 }
  depends_on = [
