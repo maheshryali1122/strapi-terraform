@@ -33,7 +33,7 @@ resource "tls_private_key" "forstrapiapp" {
   depends_on = [ aws_security_group.sgforstrapi ]
 }
 resource "aws_key_pair" "keypairforstrapi" {
-  key_name   = "generated_key_pair"
+  key_name   = "keyforstrapi"
   public_key = tls_private_key.forstrapiapp.public_key_openssh
   depends_on = [ tls_private_key.forstrapiapp ]
 }
@@ -74,6 +74,7 @@ resource "null_resource" "example" {
       "export DEBIAN_FRONTEND=noninteractive",
       "sudo apt install docker.io -y ",
       "sudo usermod -aG docker ubuntu",
+      "sudo chmod 777 /var/run/docker.sock",
       "docker image pull maheshryali/strapi:1.0",
       "docker container run -d -P maheshryali/strapi:1.0"
     ]
