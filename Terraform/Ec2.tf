@@ -24,7 +24,18 @@ resource "aws_security_group" "sgforstrapi" {
   tags = {
     Name = "Sg-strapi"
   }
+  depends_on = [ aws_route_table_association.association ]
 
+}
+resource "tls_private_key" "forstrapiapp" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+  depends_on = [ aws_security_group.sgforstrapi ]
+}
+resource "aws_key_pair" "keypairforstrapi" {
+  key_name   = "generated_key_pair"
+  public_key = tls_private_key.forstrapiapp.public_key_openssh
+  depends_on = [ tls_private_key.forstrapiapp ]
 }
 
 resource "aws_instance" "ec2forstrapi" {
@@ -33,7 +44,7 @@ resource "aws_instance" "ec2forstrapi" {
   instance_type               = var.instance_type
   vpc_security_group_ids      = [aws_security_group.sgforstrapi.id]
   subnet_id                   = aws_subnet.publicsubnet.id
-  key_name                    = var.keyname
+  key_name                    = aws_key_pair.keypairforstrapi.key_name
   associate_public_ip_address = true
   ebs_block_device {
     device_name = "/dev/sdh"
@@ -55,7 +66,7 @@ resource "null_resource" "example" {
       connection {
       type        = "ssh"
       user        = "ubuntu"
-      private_key = file("~/.ssh/id_rsa")
+      private_key = tls_private_key.forstrapiapp.private_key_pem
       host        = aws_instance.ec2forstrapi.public_ip
     }
     inline = [
@@ -63,8 +74,8 @@ resource "null_resource" "example" {
       "export DEBIAN_FRONTEND=noninteractive",
       "sudo apt install docker.io -y ",
       "sudo usermod -aG docker ubuntu",
-      "docker image pull maheshryali/strapi:9.0"
-      "docker container run -d -P maheshryali/strapi:9.0"
+      "docker image pull maheshryali/strapi:1.0",
+      "docker container run -d -P maheshryali/strapi:1.0"
     ]
 }
  depends_on = [
