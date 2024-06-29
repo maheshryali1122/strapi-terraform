@@ -37,9 +37,25 @@ resource "aws_key_pair" "keypairforstrapi" {
   public_key = tls_private_key.forstrapiapp.public_key_openssh
   depends_on = [ tls_private_key.forstrapiapp ]
 }
+data "aws_ami" "ubuntu" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = ["099720109477"] 
+  depends_on = [ aws_security_group.sgforstrapi ]
+}
 
 resource "aws_instance" "ec2forstrapi" {
-  ami                         = "ami-03c983f9003cb9cd1"
+  ami                         = data.aws_ami.ubuntu.id
   availability_zone = "us-west-2a"
   instance_type               = var.instance_type
   vpc_security_group_ids      = [aws_security_group.sgforstrapi.id]
