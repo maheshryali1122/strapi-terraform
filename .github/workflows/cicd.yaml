@@ -1,0 +1,48 @@
+name: CI/CD pipeline for Strapi API
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy application
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.USER_NAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /home/ubuntu/strapi-terraform && \
+            echo "HOST=${{ secrets.HOST }}" > .env && \
+            echo "PORT=${{ secrets.PORT }}" >> .env && \
+            echo "APP_KEYS=${{ secrets.APP_KEYS }}" >> .env && \
+            echo "API_TOKEN_SALT=${{ secrets.API_TOKEN_SALT }}" >> .env && \
+            echo "ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}" >> .env && \
+            echo "TRANSFER_TOKEN_SALT=${{ secrets.TRANSFER_TOKEN_SALT }}" >> .env && \
+            echo "DATABASE_CLIENT=${{ secrets.DATABASE_CLIENT }}" >> .env && \
+            echo "DATABASE_FILENAME=${{ secrets.DATABASE_FILENAME }}" >> .env && \
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env && \
+            git pull origin main && \
+            pm2 stop all || true && \
+            npm install && \
+            npm run build && \
+            pm2 restart all
+        env:
+          HOST: ${{ secrets.HOST }}
+          PORT: ${{ secrets.PORT }}
+          APP_KEYS: ${{ secrets.APP_KEYS }}
+          API_TOKEN_SALT: ${{ secrets.API_TOKEN_SALT }}
+          ADMIN_JWT_SECRET: ${{ secrets.ADMIN_JWT_SECRET }}
+          TRANSFER_TOKEN_SALT: ${{ secrets.TRANSFER_TOKEN_SALT }}
+          DATABASE_CLIENT: ${{ secrets.DATABASE_CLIENT }}
+          DATABASE_FILENAME: ${{ secrets.DATABASE_FILENAME }}
+
